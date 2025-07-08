@@ -14,11 +14,14 @@ export default function App($app) {
       this.setState({
         ...this.state,
         currentTab: name,
-        photos: await request(name),
+        photos: await request(name === 'all' ? '' : name),
       });
     },
   });
-  const content = new Content();
+  const content = new Content({
+    $app,
+    initialState: [],
+  });
 
   this.setState = (newState) => {
     this.state = newState;
