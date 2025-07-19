@@ -12,11 +12,7 @@ export default function App($app) {
     initialState: '',
     onClick: async (name) => {
       history.pushState(null, `${name} 사진`, name);
-      this.setState({
-        ...this.state,
-        currentTab: name,
-        photos: await request(name === 'all' ? '' : name),
-      });
+      this.updateContent(name);
     },
   });
   const content = new Content({
@@ -30,30 +26,26 @@ export default function App($app) {
     content.setState(this.state.photos);
   };
 
-  window.addEventListener('popstate', async () => {
-    const tabName = window.location.pathname.replace('/', '') || 'all';
-    const photos = await request(tabName === 'all' ? '' : tabName);
-
-    this.setState({
-      ...this.state,
-      currentTab: tabName,
-      photos: photos,
-    });
-  });
-
-  const init = async () => {
+  this.updateContent = async (tabName) => {
     try {
-      const currentTab = this.state.currentTab;
-      const initialPhotos = await request(
-        currentTab === 'all' ? '' : currentTab
-      );
+      const currentTab = tabName === 'all' ? '' : tabName;
+      const photos = await request(currentTab);
       this.setState({
         ...this.state,
-        photos: initialPhotos,
+        currentTab: tabName,
+        photos: photos,
       });
     } catch (err) {
       console.log(err);
     }
+  };
+
+  window.addEventListener('popstate', async () => {
+    this.updateContent(window.location.pathname.replace('/', ''));
+  });
+
+  const init = async () => {
+    this.updateContent(this.state.currentTab);
   };
 
   init();
